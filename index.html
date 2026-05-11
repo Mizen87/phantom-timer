@@ -10,9 +10,7 @@
     <meta name="theme-color" content="#0a0a1f">
     <title>Phantom Timer · Last Chaos</title>
     <style>
-        /* ========== VARIABLES DE TEMA ========== */
         :root {
-            /* Dragón Dorado (por defecto) */
             --bg-1: #0a0a1f;
             --bg-2: #1a0a2e;
             --card: #1a1a2e;
@@ -101,11 +99,7 @@
         transition: background 0.4s ease, color 0.4s ease;
     }
 
-    header {
-        text-align: center;
-        padding-top: 10px;
-        animation: fadeInDown 0.5s ease;
-    }
+    header { text-align: center; padding-top: 10px; animation: fadeInDown 0.5s ease; }
     @keyframes fadeInDown {
         from { opacity: 0; transform: translateY(-15px); }
         to { opacity: 1; transform: translateY(0); }
@@ -123,7 +117,6 @@
 
     .subtitle { color: var(--text-dim); font-size: 12px; margin-bottom: 12px; letter-spacing: 0.5px; }
 
-    /* Selector de tema */
     .theme-switcher {
         display: flex;
         justify-content: center;
@@ -179,7 +172,6 @@
         letter-spacing: 1px;
     }
 
-    /* Panel de configuración de notificaciones */
     .notif-panel {
         background: var(--card);
         border-radius: 14px;
@@ -195,30 +187,46 @@
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     .notif-panel .label {
-        font-size: 12px;
-        color: var(--text-dim);
+        font-size: 13px;
+        color: var(--text);
         display: flex;
         align-items: center;
         gap: 6px;
+        font-weight: 500;
     }
     .notif-panel select {
         background: var(--input);
         color: var(--text);
         border: 1px solid var(--border);
         border-radius: 8px;
-        padding: 6px 8px;
+        padding: 6px 10px;
         font-size: 13px;
         font-family: inherit;
         font-weight: 600;
     }
     .notif-panel select:focus { outline: none; border-color: var(--border-focus); }
-    .perm-warn {
-        font-size: 10px;
-        color: var(--warning);
-        margin-top: 4px;
+
+    .install-hint {
+        background: var(--card);
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        padding: 10px 14px;
+        margin-bottom: 12px;
+        font-size: 11px;
+        color: var(--text-dim);
+        text-align: center;
+        line-height: 1.5;
+    }
+    .install-hint strong { color: var(--primary); }
+    .install-hint .close-hint {
+        color: var(--text-dim);
+        font-size: 14px;
+        float: right;
+        cursor: pointer;
+        opacity: 0.6;
+        padding: 0 4px;
     }
 
-    /* Tabla */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -235,7 +243,6 @@
         font-size: 14px;
     }
     tr { transition: background 0.2s; }
-    tr:hover td { background: var(--card-hover); }
     tr:last-child td { border-bottom: none; }
     th {
         background: var(--header);
@@ -276,10 +283,7 @@
         transition: color 0.3s;
     }
     .next.pasado { color: var(--danger); text-decoration: line-through; opacity: 0.55; }
-    .next.proximo {
-        color: var(--warning);
-        animation: pulse 1.3s infinite;
-    }
+    .next.proximo { color: var(--warning); animation: pulse 1.3s infinite; }
     .next.empty { color: var(--text-dim); font-size: 18px; font-weight: normal; }
     @keyframes pulse {
         0%, 100% { opacity: 1; transform: scale(1); }
@@ -294,7 +298,6 @@
         letter-spacing: 0.3px;
     }
 
-    /* Toggle bell por canal */
     .bell {
         background: none;
         border: none;
@@ -331,11 +334,10 @@
     }
     .btn-del:active { transform: scale(0.85); }
 
-    /* Controles inferiores */
     .controls {
         position: fixed;
         bottom: 0; left: 0; right: 0;
-        background: rgba(10, 10, 31, 0.85);
+        background: color-mix(in srgb, var(--bg-1) 88%, transparent);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         padding: 12px 15px calc(12px + env(safe-area-inset-bottom)) 15px;
@@ -344,7 +346,6 @@
         gap: 10px;
         justify-content: center;
     }
-    [data-theme] .controls { background: color-mix(in srgb, var(--bg-1) 85%, transparent); }
 
     button.action {
         background: var(--primary);
@@ -369,7 +370,6 @@
         box-shadow: none;
     }
 
-    /* Toast */
     .toast {
         position: fixed;
         top: calc(env(safe-area-inset-top) + 10px);
@@ -389,7 +389,6 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* Aviso destacado en pantalla */
     .alert-banner {
         position: fixed;
         top: calc(env(safe-area-inset-top) + 50px);
@@ -440,8 +439,11 @@
         <option value="15">15 min</option>
     </select>
 </div>
-<div id="permWarn" class="perm-warn" style="display:none; text-align:center; margin-bottom:10px;">
-    ⚠️ Permite notificaciones tocando una campana para recibir avisos
+
+<div id="installHint" class="install-hint" style="display:none;">
+    <span class="close-hint" onclick="cerrarHint()">✕</span>
+    💡 <strong>Tip:</strong> Para recibir avisos con la pantalla bloqueada en iOS, añade esta web a la pantalla de inicio:<br>
+    Compartir <strong>↑</strong> → <strong>Añadir a pantalla de inicio</strong>
 </div>
 
 <table id="tabla">
@@ -458,8 +460,6 @@
 
 <div id="toast" class="toast"></div>
 <div id="alertBanner" class="alert-banner"></div>
-
-<!-- Audio para el aviso (beep generado en JS, no necesita archivo) -->
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -483,9 +483,13 @@
 
     let datos = {};
     let yaInicializado = false;
-    let avisosLanzados = {}; // canalId -> 'preview' | 'now'  para no spamear
+    let avisosLanzados = {};
 
-    // ========== TEMAS ==========
+    // Detección iOS y modo standalone (PWA)
+    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const esStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const soportaNotif = "Notification" in window;
+
     function aplicarTema(t) {
         if (t === "dragon") document.documentElement.removeAttribute("data-theme");
         else document.documentElement.setAttribute("data-theme", t);
@@ -493,7 +497,6 @@
         document.querySelectorAll(".theme-btn").forEach(b => {
             b.classList.toggle("active", b.dataset.t === t);
         });
-        // Actualizar color barra de estado iOS
         const colors = { dragon: "#0a0a1f", inferno: "#1a0505", matrix: "#000505", cyberpunk: "#0a0518" };
         document.querySelector("meta[name=theme-color]").setAttribute("content", colors[t]);
     }
@@ -502,7 +505,6 @@
     });
     aplicarTema(localStorage.getItem("phantomTheme") || "dragon");
 
-    // ========== AVISOS POR CANAL (local) ==========
     function getAvisosLocal() {
         try { return JSON.parse(localStorage.getItem("phantomAvisos") || "{}"); }
         catch(e) { return {}; }
@@ -519,29 +521,38 @@
     selMin.value = getMinutosAviso();
     selMin.addEventListener("change", () => {
         localStorage.setItem("phantomMinutos", selMin.value);
-        mostrarToast(`Aviso configurado: ${selMin.value} min antes`);
+        mostrarToast("Aviso: " + selMin.value + " min antes");
     });
 
-    // ========== PERMISO DE NOTIFICACIÓN ==========
     async function pedirPermiso() {
-        if (!("Notification" in window)) return false;
+        if (!soportaNotif) return false;
         if (Notification.permission === "granted") return true;
         if (Notification.permission === "denied") return false;
-        const r = await Notification.requestPermission();
-        return r === "granted";
+        try {
+            const r = await Notification.requestPermission();
+            return r === "granted";
+        } catch(e) { return false; }
     }
-    function actualizarAvisoPermiso() {
-        const w = document.getElementById("permWarn");
-        if (!("Notification" in window)) { w.style.display = "block"; w.textContent = "ℹ️ Este navegador no soporta notificaciones"; return; }
-        const hayAvisos = Object.keys(getAvisosLocal()).length > 0;
-        if (hayAvisos && Notification.permission !== "granted") w.style.display = "block";
-        else w.style.display = "none";
-    }
-    actualizarAvisoPermiso();
 
-    // ========== SONIDO ==========
+    // Mostrar hint de instalación en iOS si NO está en standalone y hay avisos activos
+    function actualizarHintInstalacion() {
+        const hint = document.getElementById("installHint");
+        if (localStorage.getItem("phantomHintCerrado") === "1") { hint.style.display = "none"; return; }
+        const hayAvisos = Object.keys(getAvisosLocal()).length > 0;
+        if (esIOS && !esStandalone && hayAvisos) {
+            hint.style.display = "block";
+        } else {
+            hint.style.display = "none";
+        }
+    }
+    window.cerrarHint = function() {
+        localStorage.setItem("phantomHintCerrado", "1");
+        document.getElementById("installHint").style.display = "none";
+    };
+    actualizarHintInstalacion();
+
     let audioCtx = null;
-    function beep(duracion = 600, freq = 880) {
+    function beep(duracion, freq) {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === "suspended") audioCtx.resume();
@@ -554,7 +565,6 @@
             osc.connect(gain).connect(audioCtx.destination);
             osc.start();
             osc.stop(audioCtx.currentTime + duracion / 1000);
-            // Segunda nota para alarma característica
             setTimeout(() => {
                 if (!audioCtx) return;
                 const osc2 = audioCtx.createOscillator();
@@ -570,12 +580,12 @@
         } catch(e) { console.log("Beep error:", e); }
     }
 
-    function vibrar(patron = [200, 100, 200, 100, 400]) {
+    function vibrar(patron) {
         if (navigator.vibrate) navigator.vibrate(patron);
     }
 
     function lanzarAvisoSistema(titulo, cuerpo) {
-        if ("Notification" in window && Notification.permission === "granted") {
+        if (soportaNotif && Notification.permission === "granted") {
             try {
                 new Notification(titulo, {
                     body: cuerpo,
@@ -588,10 +598,10 @@
 
     function avisar(canal, tipo) {
         const titulo = tipo === "preview"
-            ? `⚠️ Phantom en ${canal} sale pronto`
-            : `🐉 ¡PHANTOM YA EN ${canal.toUpperCase()}!`;
+            ? "⚠️ Phantom en " + canal + " sale pronto"
+            : "🐉 ¡PHANTOM YA EN " + canal.toUpperCase() + "!";
         const cuerpo = tipo === "preview"
-            ? `Quedan ${getMinutosAviso()} minutos`
+            ? "Quedan " + getMinutosAviso() + " minutos"
             : "¡A por él!";
 
         beep(tipo === "now" ? 800 : 500, tipo === "now" ? 1046 : 880);
@@ -600,7 +610,6 @@
         mostrarAlertBanner(titulo);
     }
 
-    // ========== ESTADO CONEXIÓN ==========
     const estadoEl = document.getElementById("estado");
     const estadoTxt = document.getElementById("estadoTxt");
     const connRef = ref(db, ".info/connected");
@@ -614,7 +623,6 @@
         }
     });
 
-    // ========== DATOS ==========
     onValue(canalesRef, (snapshot) => {
         const valor = snapshot.val();
         datos = valor || {};
@@ -681,22 +689,18 @@
             btnBell.title = "Activar/desactivar aviso";
             btnBell.onclick = async () => {
                 const yaOn = !!avisos[id];
-                if (!yaOn) {
-                    const ok = await pedirPermiso();
-                    if (!ok && "Notification" in window) {
-                        mostrarToast("Permiso de notificación denegado");
-                    }
+                if (!yaOn && soportaNotif) {
+                    await pedirPermiso();
                 }
                 setAvisoLocal(id, !yaOn);
                 if (!yaOn) {
-                    // Reactivar audio context con la interacción
                     beep(100, 1200);
-                    mostrarToast(`Aviso activado para ${c.canal || "este canal"}`);
+                    mostrarToast("Aviso activado: " + (c.canal || "Canal"));
                 } else {
-                    mostrarToast(`Aviso desactivado`);
+                    mostrarToast("Aviso desactivado");
                 }
                 render();
-                actualizarAvisoPermiso();
+                actualizarHintInstalacion();
             };
             tdBell.appendChild(btnBell);
 
@@ -712,7 +716,7 @@
         });
 
         if (focadoId && focadoField) {
-            const restaurar = cuerpo.querySelector(`input[data-id="${focadoId}"][data-field="${focadoField}"]`);
+            const restaurar = cuerpo.querySelector('input[data-id="' + focadoId + '"][data-field="' + focadoField + '"]');
             if (restaurar) {
                 restaurar.focus();
                 try { if (focadoSel !== null) restaurar.setSelectionRange(focadoSel, focadoSel); } catch(e) {}
@@ -745,7 +749,7 @@
         const sH = salida.getHours().toString().padStart(2, "0");
         const sM = salida.getMinutes().toString().padStart(2, "0");
 
-        td.innerHTML = `${sH}:${sM}<span class="countdown"></span>`;
+        td.innerHTML = sH + ":" + sM + '<span class="countdown"></span>';
         const cd = td.querySelector(".countdown");
 
         td.classList.remove("pasado", "proximo");
@@ -753,8 +757,8 @@
             td.classList.add("pasado");
             const minPasados = Math.floor(-diffMs / 60000);
             cd.textContent = minPasados < 60
-                ? `hace ${minPasados}m`
-                : `hace ${Math.floor(minPasados / 60)}h ${minPasados % 60}m`;
+                ? "hace " + minPasados + "m"
+                : "hace " + Math.floor(minPasados / 60) + "h " + (minPasados % 60) + "m";
         } else {
             if (diffMs < 10 * 60000) td.classList.add("proximo");
             const totalSec = Math.floor(diffMs / 1000);
@@ -762,21 +766,20 @@
             const mm = Math.floor((totalSec % 3600) / 60);
             const ss = totalSec % 60;
             cd.textContent = hh > 0
-                ? `en ${hh}h ${mm}m`
-                : (mm > 0 ? `en ${mm}m ${ss}s` : `en ${ss}s`);
+                ? "en " + hh + "h " + mm + "m"
+                : (mm > 0 ? "en " + mm + "m " + ss + "s" : "en " + ss + "s");
         }
     }
 
     function actualizar(id, campo, valor) {
         const updates = {};
-        updates[`canales/${id}/${campo}`] = valor;
+        updates["canales/" + id + "/" + campo] = valor;
         update(ref(db), updates);
 
         if (campo === "muerte") {
-            // Resetear los avisos lanzados de este canal si cambia la muerte
             delete avisosLanzados[id + "_preview"];
             delete avisosLanzados[id + "_now"];
-            const tr = document.querySelector(`tr[data-id="${id}"]`);
+            const tr = document.querySelector('tr[data-id="' + id + '"]');
             if (tr) {
                 const td = tr.cells[2];
                 td.dataset.muerte = valor;
@@ -789,7 +792,7 @@
         const num = Object.keys(datos).length + 1;
         const nuevoRef = push(canalesRef);
         set(nuevoRef, {
-            canal: `Canal ${num}`,
+            canal: "Canal " + num,
             muerte: "",
             orden: Date.now()
         });
@@ -798,7 +801,7 @@
 
     window.eliminar = function(id) {
         if (confirm("¿Eliminar este canal?")) {
-            remove(ref(db, `canales/${id}`));
+            remove(ref(db, "canales/" + id));
             setAvisoLocal(id, false);
             mostrarToast("Canal eliminado");
         }
@@ -829,14 +832,12 @@
         b._h = setTimeout(() => b.classList.remove("show"), 5000);
     }
 
-    // ========== TICK: actualizar y comprobar avisos ==========
     function tick() {
         const n = new Date();
         document.getElementById("reloj").textContent =
             n.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
         document.querySelectorAll(".next").forEach(actualizarSalidaCelda);
 
-        // Comprobar avisos
         const avisos = getAvisosLocal();
         const minPrev = getMinutosAviso();
         Object.entries(datos).forEach(([id, c]) => {
@@ -846,12 +847,10 @@
             const diffMs = salida - n;
             const diffMin = diffMs / 60000;
 
-            // Aviso "preview" X minutos antes
             if (diffMin > 0 && diffMin <= minPrev && !avisosLanzados[id + "_preview"]) {
                 avisosLanzados[id + "_preview"] = true;
                 avisar(c.canal || "Canal", "preview");
             }
-            // Aviso "now" cuando sale
             if (diffMin <= 0 && diffMin > -1 && !avisosLanzados[id + "_now"]) {
                 avisosLanzados[id + "_now"] = true;
                 avisar(c.canal || "Canal", "now");

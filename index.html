@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Phantom">
+    <meta name="theme-color" content="#0a0a1f">
+    <title>Phantom Timer · Last Chaos</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; background: #0a0a1f; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(180deg, #0a0a1f 0%, #1a0a2e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: env(safe-area-inset-top) 15px calc(110px + env(safe-area-inset-bottom)) 15px;
+        }
+        header { text-align: center; padding-top: 10px; }
+        h1 {
+            color: #ffcc00;
+            margin: 0 0 4px 0;
+            text-shadow: 0 0 12px rgba(255, 204, 0, 0.4);
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+        .subtitle { color: #888; font-size: 12px; margin-bottom: 14px; }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            margin-bottom: 14px;
+        }
+        .status.offline { background: rgba(255, 68, 102, 0.1); color: #ff4466; }
+        .status .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: currentColor;
+            animation: blink 2s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .clock {
+            text-align: center;
+            color: #00ff88;
+            font-size: 15px;
+            margin-bottom: 16px;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1a1a2e;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        th, td {
+            padding: 11px 4px;
+            text-align: center;
+            border-bottom: 1px solid #2a2a3e;
+            font-size: 14px;
+        }
+        tr:last-child td { border-bottom: none; }
+        th {
+            background: #16213e;
+            color: #ffcc00;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 12px 4px;
+        }
+        input[type="text"], input[type="time"] {
+            background: #0f0f1e;
+            color: white;
+            border: 1px solid #333;
+            padding: 9px 4px;
+            width: 100%;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.2);
+        }
+        .next {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 16px;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.2;
+        }
+        .next.pasado { color: #ff4466; text-decoration: line-through; opacity: 0.55; }
+        .next.proximo { color: #ffaa00; animation: pulse 1.3s infinite; }
+        .next.empty { color: #555; font-size: 18px; font-weight: normal; }
+        @keyframes pulse { 50% { opacity: 0.55; } }
+        .countdown {
+            display: block;
+            font-size: 10px;
+            color: #888;
+            font-weight: normal;
+            margin-top: 2px;
+        }
+        .btn-del {
+            background: none;
+            border: none;
+            color: #ff4466;
+            font-size: 22px;
+            padding: 4px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .controls {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(10, 10, 31, 0.95);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding: 12px 15px calc(12px + env(safe-area-inset-bottom)) 15px;
+            border-top: 1px solid #2a2a3e;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button.action {
+            background: #ffcc00;
+            color: #000;
+            padding: 13px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            flex: 1;
+            max-width: 220px;
+            font-family: inherit;
+        }
+        button.action.secondary {
+            background: transparent;
+            color: #ffcc00;
+            border: 1px solid #ffcc00;
+        }
+        .toast {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #16213e;
+            color: #ffcc00;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            transition: transform 0.3s;
+            z-index: 100;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+            border: 1px solid #2a3a5e;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🐉 Phantom Timer</h1>
+        <div class="subtitle">Last Chaos · Respawn +6h</div>
+        <div id="estado" class="status"><span class="dot"></span><span id="estadoTxt">Conectando...</span></div>
+        <div class="clock" id="reloj">--:--:--</div>
+    </header>
+
+    <table id="tabla">
+        <thead>
+            <tr><th>Canal</th><th>Muerte</th><th>Salida</th><th></th></tr>
+        </thead>
+        <tbody id="cuerpo"></tbody>
+    </table>
+
+    <div class="controls">
+        <button class="action" onclick="agregarFila()">➕ Canal</button>
+        <button class="action secondary" onclick="limpiarTodo()">🗑️ Limpiar</button>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, remove, push, update }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnSkXf08ZdFziPXl9lgj6wE4VQ1xI34lw",
+            authDomain: "phantom-kill.firebaseapp.com",
+            databaseURL: "https://phantom-kill-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "phantom-kill",
+            storageBucket: "phantom-kill.firebasestorage.app",
+            messagingSenderId: "515407119231",
+            appId: "1:515407119231:web:d0106d7681d8f9cb55104a",
+            measurementId: "G-SX38F2Y0T9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const canalesRef = ref(db, "canales");
+
+        let datos = {};
+        let yaInicializado = false;
+
+        const estadoEl = document.getElementById("estado");
+        const estadoTxt = document.getElementById("estadoTxt");
+        const connRef = ref(db, ".info/connected");
+        onValue(connRef, (snap) => {
+            if (snap.val() === true) {
+                estadoEl.classList.remove("offline");
+                estadoTxt.textContent = "Sincronizado";
+            } else {
+                estadoEl.classList.add("offline");
+                estadoTxt.textContent = "Sin conexión";
+            }
+        });
+
+        onValue(canalesRef, (snapshot) => {
+            const valor = snapshot.val();
+            datos = valor || {};
+
+            if (!yaInicializado && Object.keys(datos).length === 0) {
+                yaInicializado = true;
+                const inicial = {};
+                const base = Date.now();
+                ["Canal 1", "Canal 2", "Canal 3"].forEach((nombre, i) => {
+                    const k = push(canalesRef).key;
+                    inicial[k] = { canal: nombre, muerte: "", orden: base + i };
+                });
+                set(canalesRef, inicial);
+                return;
+            }
+            yaInicializado = true;
+            render();
+        });
+
+        function render() {
+            const cuerpo = document.getElementById("cuerpo");
+            const focado = document.activeElement;
+            const focadoId = focado && focado.dataset ? focado.dataset.id : null;
+            const focadoField = focado && focado.dataset ? focado.dataset.field : null;
+            let focadoSel = null;
+            try { focadoSel = focado ? focado.selectionStart : null; } catch(e) {}
+
+            cuerpo.innerHTML = "";
+            const entradas = Object.entries(datos).sort((a, b) => (a[1].orden || 0) - (b[1].orden || 0));
+
+            entradas.forEach(([id, c]) => {
+                const tr = document.createElement("tr");
+                tr.dataset.id = id;
+
+                const tdCanal = document.createElement("td");
+                const inCanal = document.createElement("input");
+                inCanal.type = "text";
+                inCanal.value = c.canal || "";
+                inCanal.dataset.id = id;
+                inCanal.dataset.field = "canal";
+                inCanal.oninput = (e) => actualizar(id, "canal", e.target.value);
+                tdCanal.appendChild(inCanal);
+
+                const tdMuerte = document.createElement("td");
+                const inMuerte = document.createElement("input");
+                inMuerte.type = "time";
+                inMuerte.value = c.muerte || "";
+                inMuerte.dataset.id = id;
+                inMuerte.dataset.field = "muerte";
+                inMuerte.onchange = (e) => actualizar(id, "muerte", e.target.value);
+                tdMuerte.appendChild(inMuerte);
+
+                const tdSalida = document.createElement("td");
+                tdSalida.className = "next";
+                tdSalida.dataset.muerte = c.muerte || "";
+                actualizarSalidaCelda(tdSalida);
+
+                const tdDel = document.createElement("td");
+                const btn = document.createElement("button");
+                btn.className = "btn-del";
+                btn.textContent = "×";
+                btn.onclick = () => eliminar(id);
+                tdDel.appendChild(btn);
+
+                tr.append(tdCanal, tdMuerte, tdSalida, tdDel);
+                cuerpo.appendChild(tr);
+            });
+
+            if (focadoId && focadoField) {
+                const restaurar = cuerpo.querySelector(`input[data-id="${focadoId}"][data-field="${focadoField}"]`);
+                if (restaurar) {
+                    restaurar.focus();
+                    try { if (focadoSel !== null) restaurar.setSelectionRange(focadoSel, focadoSel); } catch(e) {}
+                }
+            }
+        }
+
+        function actualizarSalidaCelda(td) {
+            const muerte = td.dataset.muerte;
+            if (!muerte) {
+                td.classList.add("empty");
+                td.classList.remove("pasado", "proximo");
+                td.textContent = "—";
+                return;
+            }
+            td.classList.remove("empty");
+            const [h, m] = muerte.split(":").map(Number);
+
+            const ahora = new Date();
+            const muerteDate = new Date();
+            muerteDate.setHours(h, m, 0, 0);
+            if (muerteDate > ahora) muerteDate.setDate(muerteDate.getDate() - 1);
+
+            const salida = new Date(muerteDate.getTime() + 6 * 60 * 60 * 1000);
+            const diffMs = salida - ahora;
+            const sH = salida.getHours().toString().padStart(2, "0");
+            const sM = salida.getMinutes().toString().padStart(2, "0");
+
+            td.innerHTML = `${sH}:${sM}<span class="countdown"></span>`;
+            const cd = td.querySelector(".countdown");
+
+            td.classList.remove("pasado", "proximo");
+            if (diffMs < 0) {
+                td.classList.add("pasado");
+                const minPasados = Math.floor(-diffMs / 60000);
+                cd.textContent = minPasados < 60
+                    ? `hace ${minPasados}m`
+                    : `hace ${Math.floor(minPasados / 60)}h ${minPasados % 60}m`;
+            } else {
+                if (diffMs < 10 * 60000) td.classList.add("proximo");
+                const totalSec = Math.floor(diffMs / 1000);
+                const hh = Math.floor(totalSec / 3600);
+                const mm = Math.floor((totalSec % 3600) / 60);
+                const ss = totalSec % 60;
+                cd.textContent = hh > 0
+                    ? `en ${hh}h ${mm}m`
+                    : (mm > 0 ? `en ${mm}m ${ss}s` : `en ${ss}s`);
+            }
+        }
+
+        function actualizar(id, campo, valor) {
+            const updates = {};
+            updates[`canales/${id}/${campo}`] = valor;
+            update(ref(db), updates);
+
+            if (campo === "muerte") {
+                const tr = document.querySelector(`tr[data-id="${id}"]`);
+                if (tr) {
+                    const td = tr.cells[2];
+                    td.dataset.muerte = valor;
+                    actualizarSalidaCelda(td);
+                }
+            }
+        }
+
+        window.agregarFila = function() {
+            const num = Object.keys(datos).length + 1;
+            const nuevoRef = push(canalesRef);
+            set(nuevoRef, {
+                canal: `Canal ${num}`,
+                muerte: "",
+                orden: Date.now()
+            });
+            mostrarToast("Canal añadido");
+        };
+
+        window.eliminar = function(id) {
+            if (confirm("¿Eliminar este canal?")) {
+                remove(ref(db, `canales/${id}`));
+                mostrarToast("Canal eliminado");
+            }
+        };
+
+        window.limpiarTodo = function() {
+            if (confirm("¿Borrar TODOS los canales? Esto afecta a todo el grupo.")) {
+                remove(canalesRef);
+                mostrarToast("Todo limpio");
+            }
+        };
+
+        function mostrarToast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2000);
+        }
+
+        function tick() {
+            const n = new Date();
+            document.getElementById("reloj").textContent =
+                n.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+            document.querySelectorAll(".next").forEach(actualizarSalidaCelda);
+        }
+        setInterval(tick, 1000);
+        tick();
+    </script>
+</body>
+</html>
